@@ -1,0 +1,30 @@
+{
+  "name": "umbrella-challenge-api",
+  "version": "1.0.0",
+  "description": "Umbrella FinOps fullstack challenge - API starter",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts,js --exec \"npx ts-node src/server.ts\"",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "migrate": "npx ts-node scripts/migrate.ts",
+    "seed:records": "npx ts-node scripts/seed-records.ts",
+    "test": "jest --verbose"
+  },
+  "dependencies": {
+    "axios": "1.6.0",
+    "express": "4.18.2",
+    "jsonwebtoken": "8.5.1",
+    "dotenv": "^16.4.7",
+    "pg": "8.11.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^20.17.0",
+    "@types/pg": "^8.11.13",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
