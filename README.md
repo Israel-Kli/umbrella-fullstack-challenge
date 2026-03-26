@@ -9,17 +9,18 @@ See **[CHALLENGE.md](./CHALLENGE.md)** for requirements.
 
 - Node.js 22+
 - PostgreSQL 17+ running locally
-- A database named `umbrella_challenge` (or configure `DATABASE_URL` in `.env`)
-
-```bash
-createdb umbrella_challenge
-```
 
 ---
 
 ## Quick Start
 
-### 1. API setup
+### 1. Create the database
+
+```bash
+createdb umbrella_challenge
+```
+
+### 2. API setup
 
 ```bash
 cd api
@@ -29,7 +30,7 @@ npm run migrate            # Creates tables and seed data
 npm run dev                # Starts on http://localhost:3001
 ```
 
-### 2. Frontend setup
+### 3. Frontend setup
 
 ```bash
 cd web
