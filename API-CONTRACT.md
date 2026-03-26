@@ -76,6 +76,7 @@ Response `200`:
 - Role: `admin` only
 - Idempotent on `(externalId, organizationId)` — re-ingesting same record counts as deduplicated
 - All records stored with `organization_id = X-Customer-Organization-Id`
+- **Apply governance tag rules on ingestion**: for each record, find the first matching enabled rule (by `id` order) and store `governance_tag_key`, `governance_tag_value`, `matched_rule_id`
 
 ---
 
@@ -103,13 +104,7 @@ Response `200`:
       "amount": 142.35,
       "governanceTagKey": "CostCategory",
       "governanceTagValue": "Compute",
-      "matchedRuleId": 1,
-      "explainability": {
-        "ruleName": "Tag EC2 as Compute",
-        "matchType": "exact",
-        "fieldName": "service",
-        "pattern": "AmazonEC2"
-      }
+      "matchedRuleId": 1
     }
   ],
   "total": 42,
@@ -148,47 +143,23 @@ Rule shape:
 `matchType` values:
 - `exact` — field value equals pattern exactly
 - `contains` — field value contains pattern (case-insensitive)
-- `regex` — field value matches pattern as a regular expression
 
 `fieldName` may reference: `service`, `region`, `cloudProvider`, `accountId`, or `native_tags` (match against JSON string representation)
 
-**Priority**: Higher number wins. Tie-break: most recently updated rule wins. Only ONE rule is applied per record.
+**Matching order**: First matching enabled rule wins (ordered by `id`). Only ONE rule is applied per record. The `priority` field is stored but not used for matching order in the core challenge (see Bonus in CHALLENGE.md).
 
 ---
 
-### 4. Re-apply governance rules
+### 4. Allocation summary
 
 ```
-POST /api/v1/governance-tagging/reapply
-Authorization: Bearer <jwt>   (role: admin)
-X-Customer-Organization-Id: cust_northwind_health
-```
-
-Request body:
-```json
-{ "from": "2026-03-01", "to": "2026-03-31" }
-```
-
-Response `200` (synchronous, acceptable for small date ranges):
-```json
-{ "updatedRecordCount": 6 }
-```
-
-Applies all enabled rules to all matching records in the date range, in priority order. Updates `governance_tag_key`, `governance_tag_value`, `matched_rule_id`, and `explainability` on each record.
-
----
-
-### 5. Allocation summary
-
-```
-GET /api/v1/allocation/summary?from=2026-03-01&to=2026-03-31&groupBy=governanceTagKey&baseCurrency=USD
+GET /api/v1/allocation/summary?from=2026-03-01&to=2026-03-31&baseCurrency=USD
 Authorization: Bearer <jwt>   (viewer or admin)
 X-Customer-Organization-Id: cust_northwind_health
 ```
 
 Query params:
 - `from`, `to` — date range (required)
-- `groupBy` — dimension to group by (`governanceTagKey`, `service`, `region`)
 - `baseCurrency` — target currency for normalization (optional, default: no conversion)
 
 Response `200`:
@@ -197,10 +168,9 @@ Response `200`:
   "baseCurrency": "USD",
   "items": [
     { "group": "CostCategory:Compute",    "totalAmount": 142.35, "recordCount": 1 },
-    { "group": "CostCategory:Production", "totalAmount": 24.77,  "recordCount": 1 },
-    { "group": "untagged",                "totalAmount": 0.00,   "recordCount": 0 }
-  ],
-  "warnings": []
+    { "group": "Lifecycle:Production",     "totalAmount": 24.77,  "recordCount": 1 },
+    { "group": "untagged",                 "totalAmount": 0.00,   "recordCount": 0 }
+  ]
 }
 ```
 
@@ -210,11 +180,7 @@ Response `200`:
 - Response: `{"date":"2026-03-03","base":"EUR","quote":"USD","rate":1.1656}`
 - `rate` is the multiplier: `converted = original_amount * rate`
 - Cache rates in `exchange_rate_cache` table — historical rates don't change
-- If the API is unavailable, return amounts in original currencies and include a warning:
-  ```json
-  { "warnings": ["Exchange rates unavailable; amounts shown in original currencies"] }
-  ```
-- Do NOT make one API call per record — batch by unique (date, currency) pairs
+- If the API is unavailable, return `502`
 
 ---
 

@@ -109,7 +109,7 @@ INSERT INTO app_users (id, email, home_org_id, role) VALUES
   ('u-contoso-admin',   'platform.admin@contoso-retail.example', 'cust_contoso_retail_eu', 'admin')
 ON CONFLICT (id) DO NOTHING;
 
--- Pre-seeded rules so you can test re-apply without building CRUD first
+-- Pre-seeded rules so you can test rule matching during ingestion
 INSERT INTO governance_tag_rules
   (organization_id, name, match_type, field_name, pattern, target_tag_key, target_tag_value, priority, enabled)
 VALUES

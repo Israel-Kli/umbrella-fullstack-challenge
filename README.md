@@ -7,8 +7,8 @@ See **[CHALLENGE.md](./CHALLENGE.md)** for requirements.
 
 ## Prerequisites
 
-- Node.js 18+
-- PostgreSQL 14+ running locally
+- Node.js 22+
+- PostgreSQL 17+ running locally
 - A database named `umbrella_challenge` (or configure `DATABASE_URL` in `.env`)
 
 ```bash
@@ -115,10 +115,12 @@ The trap record (`cust_unknown_corp`) should always fail with 403.
 ## What you implement
 
 Add files under:
-- `api/src/governance-tags/` — your backend modules
-- `web/src/pages/` — your frontend views
+- `api/src/` — your backend modules (usage-cost-records, governance-tag-rules, allocation)
+- `web/src/pages/` — your frontend view (Allocation Overview)
 
 Then register your routers in `api/src/app/routes.ts` (see the TODO comments there).
+
+See **[CHALLENGE.md](./CHALLENGE.md)** for full requirements and optional bonus items.
 
 ---
 
